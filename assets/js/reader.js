@@ -51,7 +51,6 @@
   var pad = function (n) { return (n < 10 ? "0" : "") + n; };
 
   // --- 顶栏与幕布文案 ---------------------------------------------------
-  document.title = "翻阅 · " + book.title;
   el.bookNo.textContent = book.no;
   el.bookName.textContent = book.title;
   el.bookEn.textContent = book.en;
