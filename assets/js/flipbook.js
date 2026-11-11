@@ -35,6 +35,7 @@
     this.onLoading = opts.onLoading || function () {};
 
     this.busy = false;
+    this.locked = false;
     this.turn = null;
     this.cache = new Map();
     this.reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -45,6 +46,12 @@
     this.render();
     this.preloadAround();
   }
+
+  // 放大查阅期间锁死翻页：拖动与点击都让给 zoom.js，避免同一个 pointerdown 被两边解读
+  Flipbook.prototype.setLocked = function (on) {
+    this.locked = Boolean(on);
+    if (this.locked) this.root.classList.remove("is-dragging");
+  };
 
   Flipbook.prototype.page = function (i) {
     return this.pages[clamp(i, 0, this.pages.length - 1)];
@@ -206,7 +213,7 @@
   Flipbook.prototype.turnPage = function (dir, opts) {
     var self = this;
     opts = opts || {};
-    if (this.busy) return Promise.resolve(false);
+    if (this.busy || this.locked) return Promise.resolve(false);
     var turn = this.makeTurn(dir);
     if (!turn) {
       this.bump(dir);
@@ -233,7 +240,7 @@
     var self = this;
     opts = opts || {};
     index = clamp(index, 0, this.pages.length - 1);
-    if (this.busy || index === this.index) return Promise.resolve(false);
+    if (this.busy || this.locked || index === this.index) return Promise.resolve(false);
     this.busy = true;
     this.onLoading(true);
     return this.ensure(this.pages[index])
@@ -265,7 +272,7 @@
     var drag = null;
 
     this.root.addEventListener("pointerdown", function (e) {
-      if (self.busy || e.button > 0) return;
+      if (self.busy || self.locked || e.button > 0) return;
       var box = self.root.getBoundingClientRect();
       drag = {
         id: e.pointerId,

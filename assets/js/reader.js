@@ -19,6 +19,7 @@
 
   var el = {
     book: document.getElementById("book"),
+    stage: document.getElementById("stage"),
     rig: document.getElementById("rig"),
     panelL: document.getElementById("panelL"),
     panelR: document.getElementById("panelR"),
@@ -36,6 +37,7 @@
     btnNext: document.getElementById("btnNext"),
     btnAuto: document.getElementById("btnAuto"),
     btnStrip: document.getElementById("btnStrip"),
+    btnZoom: document.getElementById("btnZoom"),
     btnFull: document.getElementById("btnFull"),
     btnStripClose: document.getElementById("btnStripClose"),
     strip: document.getElementById("strip"),
@@ -71,6 +73,16 @@
 
   // --- 翻页引擎 ---------------------------------------------------------
   var thumbEls = [];
+  var zoomed = false;
+
+  // 翻页入口都收在这一处：放大查阅期间整条导航线停用
+  function syncNav(index) {
+    var last = book.pages.length - 1;
+    el.btnPrev.disabled = zoomed || index === 0;
+    el.btnNext.disabled = zoomed || index === last;
+    el.btnAuto.disabled = zoomed;
+    el.btnStrip.disabled = zoomed;
+  }
 
   var fb = new window.Flipbook({
     root: el.book,
@@ -99,8 +111,7 @@
     el.pageNow.textContent = pad(2 * n - 1);
     el.barFill.style.transform = "scaleX(" + (n / total).toFixed(4) + ")";
     el.bar.setAttribute("aria-valuenow", String(2 * n - 1));
-    el.btnPrev.disabled = index === 0;
-    el.btnNext.disabled = index === total - 1;
+    syncNav(index);
     syncThumbs(index);
     var url = "?book=" + encodeURIComponent(book.slug) + "&p=" + n;
     window.history.replaceState(null, "", url);
@@ -203,14 +214,52 @@
     el.btnFull.textContent = document.fullscreenElement ? "退出全屏" : "全屏";
   });
 
+  // --- 放大查阅 ---------------------------------------------------------
+  // 放大态只做视图变换：翻页锁死（Flipbook.setLocked），导航整条灰掉，
+  // 拖动/滚轮/双指全部交给 ZoomPan，两套手势不会撞在同一个 pointerdown 上。
+  var zp = new window.ZoomPan({
+    root: el.rig,
+    stage: el.stage,
+    min: 1,
+    max: 4,
+    enterScale: 2,
+    onChange: onZoomChange
+  });
+
+  function stageCenter() {
+    var box = el.stage.getBoundingClientRect();
+    return { x: box.left + box.width / 2, y: box.top + box.height / 2 };
+  }
+
+  function onZoomChange(active) {
+    if (active === zoomed) return;
+    zoomed = active;
+    el.btnZoom.textContent = active ? "缩小" : "放大";
+    el.btnZoom.setAttribute("aria-pressed", String(active));
+    el.btnZoom.setAttribute("aria-label", active ? "缩小回整页" : "放大查看细节");
+    if (active) {
+      stopAuto();
+      setStrip(false);
+      fb.setLocked(true);
+      toast("拖动看细节 · 滚轮或双指缩放 · 点「缩小」恢复翻页", 3600);
+    } else {
+      fb.setLocked(false);
+    }
+    syncNav(fb.index);
+  }
+
+  el.btnZoom.addEventListener("click", function () { zp.toggle(); });
+
   // --- 进度条 -----------------------------------------------------------
   el.bar.addEventListener("click", function (e) {
+    if (zoomed) return;
     var box = el.bar.getBoundingClientRect();
     var ratio = clamp((e.clientX - box.left) / box.width, 0, 1);
     fb.goTo(Math.round(ratio * (book.pages.length - 1)));
   });
 
   el.bar.addEventListener("keydown", function (e) {
+    if (zoomed) return;
     if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
       e.preventDefault();
       e.stopPropagation();
@@ -222,6 +271,29 @@
   document.addEventListener("keydown", function (e) {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     var key = e.key;
+
+    if (key === "z" || key === "Z") {
+      e.preventDefault();
+      zp.toggle();
+      return;
+    }
+
+    // 放大态：翻页键全部让位，只留下缩放与退出
+    if (zoomed) {
+      var c = stageCenter();
+      if (key === "Escape") {
+        e.preventDefault();
+        zp.setActive(false);
+      } else if (key === "+" || key === "=") {
+        e.preventDefault();
+        zp.zoomAt(zp.scale() * 1.25, c.x, c.y);
+      } else if (key === "-" || key === "_") {
+        e.preventDefault();
+        zp.zoomAt(zp.scale() / 1.25, c.x, c.y);
+      }
+      return;
+    }
+
     if (key === "ArrowRight" || key === "PageDown" || key === " ") {
       e.preventDefault();
       if (autoTimer) stopAuto();

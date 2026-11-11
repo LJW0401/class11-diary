@@ -604,6 +604,43 @@ body.strip-open .rig {
   50% { transform: scaleY(1); opacity: 1; }
 }
 
+/* --- 放大查阅 --------------------------------------------------------- */
+/* 放大只改 .rig 的 transform：书体布局、页号、进度都不动，翻页由 JS 锁死。 */
+
+.rig {
+  will-change: transform;
+}
+
+body.is-zoomed .book {
+  cursor: grab;
+  touch-action: none;
+}
+
+.rig.is-panning .book,
+body.is-zoomed .book.is-panning {
+  cursor: grabbing;
+}
+
+body.is-zoomed .edge,
+body.is-zoomed .rotate-hint,
+body.is-zoomed .rhint {
+  display: none;
+}
+
+body.is-zoomed .bar {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+/* 放大后书页会顶到顶栏底栏底下，给两条渐变遮罩保证文字仍然可读 */
+body.is-zoomed .rbar {
+  background: linear-gradient(to bottom, rgba(11, 9, 8, 0.94), rgba(11, 9, 8, 0));
+}
+
+body.is-zoomed .rfoot {
+  background: linear-gradient(to top, rgba(11, 9, 8, 0.96), rgba(11, 9, 8, 0));
+}
+
 /* --- 窄屏 / 矮屏 ------------------------------------------------------ */
 
 @media (max-width: 860px) {
