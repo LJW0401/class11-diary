@@ -153,9 +153,11 @@
       state.p = p;
       var angle = dir > 0 ? -180 * p : -180 + 180 * p;
       var lift = Math.sin((Math.abs(angle) * Math.PI) / 180);
-      // 沿页面的法线把叶子抬起来一点，翻动时才有「纸离开桌面」的感觉
+      // 抬高要写在旋转前面：translateZ 先沿世界 z 轴把整片纸推近读者，再绕书脊转。
+      // 反过来写（rotateY 再 translateZ）等于沿页面法线平移，书脊会跟着左右漂最多 26px，
+      // 翻页时中间那条缝就会左右滑动。
       self.leaf.style.transform =
-        "rotateY(" + angle.toFixed(2) + "deg) translateZ(" + (lift * 26).toFixed(2) + "px)";
+        "translateZ(" + (lift * 26).toFixed(2) + "px) rotateY(" + angle.toFixed(2) + "deg)";
       self.root.style.setProperty("--shade", lift.toFixed(3));
     };
 
