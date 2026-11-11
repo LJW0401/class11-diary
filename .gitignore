@@ -1,0 +1,8 @@
+# 原始大图只在本机留档，不进仓库（见 README「关于体积」）
+assets/source/
+
+# 字体子集的临时字符表
+.cache-charset.txt
+
+.DS_Store
+Thumbs.db

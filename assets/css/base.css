@@ -1,0 +1,214 @@
+/* ==========================================================================
+   base.css — 全站设计基底
+   职责：设计变量、字体、重置、以及「暗房 / 纸」这一套共享氛围层。
+   页面级布局分别在 home.css / reader.css 里，不在这里堆组件。
+   ========================================================================== */
+
+@font-face {
+  font-family: "WenKai";
+  src: url("../fonts/wenkai.woff2") format("woff2");
+  font-weight: 300 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Garamond";
+  src: url("../fonts/garamond.woff2") format("woff2");
+  font-weight: 400 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* 暗房 */
+  --room: #100e0b;
+  --room-2: #17130e;
+  --room-3: #221c15;
+
+  /* 纸 */
+  --paper: #f0e7d7;
+  --paper-2: #d8ccb6;
+  --paper-3: #9b8f7b;
+
+  /* 朱砂与黄铜 */
+  --seal: #b03a2c;
+  --seal-soft: #c9604f;
+  --brass: #c4a37a;
+
+  --line: rgba(240, 231, 215, 0.14);
+  --line-strong: rgba(240, 231, 215, 0.28);
+
+  --font-cn: "WenKai", "LXGW WenKai", "Songti SC", "Noto Serif CJK SC", serif;
+  --font-lat: "Garamond", "EB Garamond", Georgia, serif;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-io: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  background: var(--room);
+  color: var(--paper);
+  font-family: var(--font-cn);
+  font-weight: 300;
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 1px solid var(--brass);
+  outline-offset: 6px;
+}
+
+::selection {
+  background: var(--seal);
+  color: var(--paper);
+}
+
+/* --- 氛围层：灯光 / 颗粒 / 暗角 --------------------------------------- */
+
+.ambience {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.ambience__lamp {
+  position: absolute;
+  inset: -20% -10% auto;
+  height: 140%;
+  background:
+    radial-gradient(58% 46% at 62% 8%, rgba(255, 214, 158, 0.16), transparent 70%),
+    radial-gradient(80% 60% at 20% 100%, rgba(120, 74, 40, 0.18), transparent 70%),
+    linear-gradient(180deg, #17130f 0%, #100e0b 42%, #0b0908 100%);
+}
+
+.ambience__grain {
+  position: absolute;
+  inset: -50%;
+  opacity: 0.22;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+}
+
+.ambience__vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 90% at 50% 45%, transparent 30%, rgba(0, 0, 0, 0.62) 100%);
+}
+
+/* --- 共享排版 -------------------------------------------------------- */
+
+.eyebrow {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-lat);
+  font-size: 11px;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--paper-3);
+}
+
+.eyebrow::before {
+  content: "";
+  width: 34px;
+  height: 1px;
+  background: var(--line-strong);
+}
+
+.rule {
+  height: 1px;
+  background: var(--line);
+  border: 0;
+  margin: 0;
+}
+
+.num {
+  font-family: var(--font-lat);
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: 0.02em;
+}
+
+/* 朱砂印：站内唯一的高饱和色，只用在「班号」这一处。 */
+.seal {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 1px solid rgba(255, 240, 230, 0.5);
+  background: var(--seal);
+  color: #fdf3e7;
+  font-family: var(--font-lat);
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  box-shadow: 0 2px 14px rgba(176, 58, 44, 0.35);
+  transform: rotate(-4deg);
+}
+
+/* 细微的入场：只给首屏需要交代顺序的元素用 */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

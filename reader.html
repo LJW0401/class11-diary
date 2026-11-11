@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>翻阅 · 高中观察日记</title>
+<meta name="theme-color" content="#0b0908">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23b03a2c'/%3E%3Ctext x='32' y='42' font-family='Georgia,serif' font-size='26' fill='%23fdf3e7' text-anchor='middle'%3E311%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/reader.css">
+</head>
+<body class="reader">
+
+<div class="ambience ambience--reader" aria-hidden="true">
+  <div class="ambience__lamp"></div>
+  <div class="ambience__grain"></div>
+  <div class="ambience__vignette"></div>
+</div>
+
+<header class="rbar">
+  <a class="rback" href="index.html">
+    <span class="rback__arrow" aria-hidden="true">←</span>
+    <span>书架</span>
+  </a>
+
+  <div class="rtitle">
+    <span class="rtitle__no num" id="bookNo">壹</span>
+    <span class="rtitle__name" id="bookName">斜塔</span>
+    <span class="rtitle__en" id="bookEn">The Leaning Tower</span>
+  </div>
+
+  <div class="rcount">
+    <span class="num" id="pageNow">01</span>
+    <span class="rcount__sep">/</span>
+    <span class="num" id="pageTotal">90</span>
+  </div>
+</header>
+
+<main class="stage" id="stage">
+  <div class="rig" id="rig">
+    <div class="book" id="book" tabindex="0" role="group" aria-roledescription="翻书" aria-label="跨页图像，可拖动翻页">
+      <div class="panel panel--l" id="panelL"></div>
+      <div class="panel panel--r" id="panelR"></div>
+      <div class="leaf" id="leaf" hidden>
+        <div class="leaf__face leaf__face--front" id="leafFront"></div>
+        <div class="leaf__face leaf__face--back" id="leafBack"></div>
+      </div>
+      <div class="gutter" aria-hidden="true"></div>
+    </div>
+
+    <span class="edge edge--l" aria-hidden="true">←</span>
+    <span class="edge edge--r" aria-hidden="true">→</span>
+  </div>
+
+  <p class="loadnote" id="loadnote" hidden>…</p>
+  <p class="rotate-hint">横过来看，跨页更大</p>
+</main>
+
+<footer class="rfoot">
+  <div class="bar" id="bar" role="slider" tabindex="0" aria-label="翻页进度" aria-valuemin="1" aria-valuemax="90" aria-valuenow="1">
+    <div class="bar__track"><div class="bar__fill" id="barFill"></div></div>
+  </div>
+
+  <div class="rfoot__row">
+    <p class="rhint">
+      <span class="rhint__k">拖动</span> 或
+      <span class="rhint__k">←</span><span class="rhint__k">→</span> 翻页
+    </p>
+    <div class="rtools">
+      <button class="tool" id="btnPrev" aria-label="上一页">上一页</button>
+      <button class="tool" id="btnNext" aria-label="下一页">下一页</button>
+      <span class="rtools__sep" aria-hidden="true"></span>
+      <button class="tool" id="btnAuto" aria-pressed="false">自动翻阅</button>
+      <button class="tool" id="btnStrip" aria-pressed="false">缩略图</button>
+      <button class="tool" id="btnFull" aria-pressed="false">全屏</button>
+    </div>
+  </div>
+</footer>
+
+<section class="strip" id="strip" hidden aria-label="缩略图">
+  <div class="strip__inner">
+    <div class="strip__head">
+      <span class="strip__title">全部 <span class="num" id="stripCount">90</span> 个跨页</span>
+      <button class="tool tool--plain" id="btnStripClose">收起</button>
+    </div>
+    <div class="strip__scroll" id="stripScroll"></div>
+  </div>
+</section>
+
+<div class="toast" id="toast" hidden role="status"></div>
+
+<div class="veil" id="veil">
+  <div class="veil__inner">
+    <span class="veil__no num" id="veilNo">壹</span>
+    <span class="veil__title" id="veilTitle">斜塔</span>
+    <span class="veil__line" aria-hidden="true"></span>
+  </div>
+</div>
+
+<noscript>
+  <p style="position:fixed;inset:auto 0 24px;text-align:center;color:#d8ccb6">
+    这个阅览室需要 JavaScript 才能翻页。
+  </p>
+</noscript>
+
+<script src="assets/js/books-data.js"></script>
+<script src="assets/js/flipbook.js"></script>
+<script src="assets/js/reader.js"></script>
+</body>
+</html>

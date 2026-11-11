@@ -1,0 +1,517 @@
+/* ==========================================================================
+   home.css — 书架首页
+   一屏暗桌面：左边两册书落在同一条线上，右边竖排标题。
+   布局按「视口高度」缩放，不做滚动式长页（版权页另起一段）。
+   ========================================================================== */
+
+body.home {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+}
+
+/* --- 报头 ------------------------------------------------------------- */
+
+.masthead {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: clamp(18px, 2.6vh, 30px) clamp(20px, 5vw, 84px) 0;
+  animation: rise 1s var(--ease-out) both;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.brand__no {
+  font-size: 15px;
+  letter-spacing: 0.22em;
+  color: var(--paper);
+}
+
+.brand__rule {
+  width: clamp(28px, 5vw, 64px);
+  height: 1px;
+  background: var(--line-strong);
+}
+
+.brand__txt {
+  font-size: 12px;
+  letter-spacing: 0.3em;
+  color: var(--paper-3);
+}
+
+.masthead__meta {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  color: var(--paper-3);
+}
+
+/* --- 主视觉 ----------------------------------------------------------- */
+
+.hero {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.04fr) minmax(0, 0.96fr);
+  grid-template-rows: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: clamp(20px, 4vw, 72px);
+  row-gap: clamp(14px, 2.4vh, 30px);
+  width: 100%;
+  max-width: 1580px;
+  margin: 0 auto;
+  padding: clamp(18px, 4vh, 48px) clamp(20px, 5vw, 84px) clamp(14px, 2.2vh, 28px);
+}
+
+/* --- 书架 ------------------------------------------------------------- */
+
+.hero__shelf {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: clamp(30px, 3.8vw, 68px);
+  padding: 0 clamp(2px, 1.6vw, 22px) 92px;
+  animation: fade 1.4s var(--ease-out) 0.15s both;
+}
+
+.hero__shelf::before {
+  content: "";
+  position: absolute;
+  left: -6%;
+  right: -6%;
+  bottom: 40px;
+  height: 76%;
+  background: radial-gradient(48% 52% at 50% 54%, rgba(255, 197, 130, 0.13), transparent 72%);
+  filter: blur(24px);
+  pointer-events: none;
+}
+
+.shelf-line {
+  position: absolute;
+  left: -6%;
+  right: -2%;
+  bottom: 92px;
+  height: 1px;
+  background: linear-gradient(90deg,
+      transparent, rgba(196, 163, 122, 0.3) 18%, rgba(196, 163, 122, 0.52) 52%, rgba(196, 163, 122, 0.12) 92%, transparent);
+}
+
+.shelf-line::after {
+  content: "";
+  position: absolute;
+  left: 8%;
+  right: 12%;
+  top: -10px;
+  height: 30px;
+  background: radial-gradient(50% 50% at 50% 50%, rgba(255, 198, 130, 0.18), transparent 72%);
+  filter: blur(9px);
+}
+
+.book {
+  --rot: -2.4deg;
+  position: relative;
+  width: clamp(150px, 17.8vw, 262px);
+  flex: 0 0 auto;
+  transform: rotate(var(--rot));
+  transform-origin: 50% 94%;
+  transition: transform 0.85s var(--ease-out);
+  animation: bookIn 1.1s var(--ease-out) both;
+}
+
+.book--2 {
+  --rot: 1.7deg;
+  width: clamp(142px, 16.8vw, 246px);
+  animation-delay: 0.14s;
+  animation-name: bookIn2;
+}
+
+@keyframes bookIn {
+  from {
+    opacity: 0;
+    translate: 0 34px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes bookIn2 {
+  from {
+    opacity: 0;
+    translate: 0 44px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 -10px;
+  }
+}
+
+.book__cover {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 28px 24px rgba(0, 0, 0, 0.62)) drop-shadow(0 3px 4px rgba(0, 0, 0, 0.45));
+  transition: filter 0.8s var(--ease-out);
+}
+
+.book__glow {
+  position: absolute;
+  inset: -14% -16% 18%;
+  background: radial-gradient(50% 46% at 50% 58%, rgba(255, 199, 132, 0.34), transparent 70%);
+  filter: blur(22px);
+  opacity: 0;
+  transition: opacity 0.8s var(--ease-out);
+  pointer-events: none;
+}
+
+.book:focus-visible {
+  outline: none;
+}
+
+.book:focus-visible .book__cover {
+  outline: 1px solid var(--brass);
+  outline-offset: 10px;
+}
+
+.book:hover,
+.book:focus-visible {
+  transform: rotate(calc(var(--rot) * 0.2)) translate(0, -16px) scale(1.015);
+}
+
+.book:hover .book__glow,
+.book:focus-visible .book__glow {
+  opacity: 1;
+}
+
+.book:hover .book__cover,
+.book:focus-visible .book__cover {
+  filter: drop-shadow(0 42px 36px rgba(0, 0, 0, 0.7)) drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5));
+}
+
+.book__meta {
+  position: absolute;
+  top: calc(100% + 21px);
+  left: 0;
+  right: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.book__cap {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.book__no {
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  color: var(--seal-soft);
+}
+
+.book__name {
+  font-size: clamp(15px, 1.2vw, 18px);
+  letter-spacing: 0.2em;
+  color: var(--paper);
+}
+
+.book__sub {
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  color: var(--paper-3);
+  transition: color 0.5s;
+}
+
+.book:hover .book__sub {
+  color: var(--brass);
+}
+
+/* --- 竖排标题 --------------------------------------------------------- */
+
+.hero__type {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: clamp(14px, 1.8vw, 24px);
+  text-align: right;
+  animation: rise 1.2s var(--ease-out) 0.2s both;
+}
+
+.title-v {
+  margin: 0;
+  writing-mode: vertical-rl;
+  font-family: var(--font-cn);
+  font-weight: 400;
+  font-size: clamp(34px, min(5.2vw, 6.9vh), 78px);
+  line-height: 1;
+  letter-spacing: 0.16em;
+  color: var(--paper);
+  text-shadow: 0 8px 44px rgba(0, 0, 0, 0.72);
+}
+
+.hero__stack {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: clamp(18px, 2.6vw, 44px);
+}
+
+.hero__titlewrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: clamp(12px, 1.6vh, 20px);
+}
+
+.lede {
+  margin: 0;
+  max-width: 20em;
+  padding-bottom: 4px;
+  font-size: clamp(12.5px, 0.98vw, 14.5px);
+  line-height: 2.1;
+  color: var(--paper-2);
+}
+
+/* --- 页脚 ------------------------------------------------------------- */
+
+.hero__foot {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 20px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  font-size: 10.5px;
+  letter-spacing: 0.24em;
+  color: var(--paper-3);
+  animation: fade 1.6s var(--ease-out) 0.55s both;
+}
+
+.scroll-cue {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--paper-2);
+  transition: color 0.4s;
+}
+
+.scroll-cue:hover {
+  color: var(--brass);
+}
+
+.scroll-cue span {
+  display: inline-block;
+  animation: drift 2.8s ease-in-out infinite;
+}
+
+@keyframes drift {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(4px); }
+}
+
+/* --- 版权页 ----------------------------------------------------------- */
+
+.about {
+  position: relative;
+  z-index: 1;
+  border-top: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.016), transparent 42%);
+}
+
+.about__inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: clamp(64px, 9vw, 120px) clamp(20px, 5vw, 84px) clamp(56px, 7vw, 96px);
+}
+
+.about__title {
+  margin: 20px 0 clamp(28px, 4vw, 46px);
+  font-weight: 400;
+  font-size: clamp(24px, 2.9vw, 38px);
+  letter-spacing: 0.12em;
+}
+
+.about__cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(22px, 4vw, 62px);
+}
+
+.about__cols p {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 2.15;
+  color: var(--paper-2);
+}
+
+.about__cols code {
+  font-family: var(--font-lat);
+  font-size: 13px;
+  color: var(--brass);
+  padding: 1px 5px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  margin: clamp(40px, 6vw, 68px) 0 0;
+  background: var(--line);
+  border: 1px solid var(--line);
+}
+
+.facts__item {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 22px 20px 24px;
+  background: #131009;
+}
+
+.facts dt {
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  color: var(--paper-3);
+}
+
+.facts dd {
+  margin: 0;
+  font-size: 15px;
+  letter-spacing: 0.08em;
+}
+
+.site-foot {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 26px clamp(20px, 5vw, 84px) 34px;
+  border-top: 1px solid var(--line);
+  font-size: 10.5px;
+  letter-spacing: 0.2em;
+  color: var(--paper-3);
+}
+
+.site-foot__right {
+  display: inline-flex;
+  gap: 10px;
+  align-items: baseline;
+}
+
+.site-foot a {
+  color: var(--paper-2);
+  transition: color 0.4s;
+}
+
+.site-foot a:hover {
+  color: var(--brass);
+}
+
+/* 点书后整页淡出，给「进入」一点过渡 */
+body.is-leaving .hero,
+body.is-leaving .masthead {
+  opacity: 0;
+  transform: scale(0.992);
+  transition: opacity 0.34s ease, transform 0.34s ease;
+}
+
+/* --- 窄屏 ------------------------------------------------------------- */
+
+@media (max-width: 900px) {
+  .hero {
+    grid-template-columns: 1fr;
+    align-items: start;
+    row-gap: 38px;
+    padding-top: 28px;
+    padding-bottom: 26px;
+  }
+
+  .hero__type {
+    order: -1;
+    align-items: flex-start;
+    text-align: left;
+    gap: 14px;
+  }
+
+  .title-v {
+    writing-mode: horizontal-tb;
+    font-size: clamp(30px, 8.4vw, 46px);
+    letter-spacing: 0.14em;
+  }
+
+  .hero__stack {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 22px;
+  }
+
+  .hero__titlewrap {
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .lede {
+    max-width: 26em;
+  }
+
+  .seal {
+    width: 38px;
+    height: 38px;
+    font-size: 12px;
+  }
+
+  .hero__shelf {
+    justify-content: center;
+    padding-bottom: 72px;
+    gap: 24px;
+  }
+
+  .book {
+    width: min(38vw, 210px);
+  }
+
+  .book--2 {
+    width: min(35vw, 196px);
+  }
+
+  .book__meta {
+    top: calc(100% + 13px);
+  }
+
+  .shelf-line {
+    bottom: 72px;
+  }
+
+  .about__cols {
+    grid-template-columns: 1fr;
+  }
+
+  .facts {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .hero__foot {
+    font-size: 10px;
+    letter-spacing: 0.16em;
+  }
+}
