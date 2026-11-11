@@ -5,6 +5,7 @@
 - 纯静态：没有构建步骤、没有后端、没有第三方依赖，`index.html` 直接打开就能用。
 - 两册：`斜塔`（90 个跨页）、`暗香`（19 个跨页），跨页图为原片的 WebP 版本。
 - 翻页：CSS 3D 的「一叶翻面」，正面是本页右半、背面是下一页左半；支持拖拽、键盘、触摸滑动。
+- 线上：<https://penguin.he.cn/class11-diary/>
 
 ## 目录
 
@@ -69,17 +70,19 @@ python3 scripts/build_fonts.py             # 改过文案后重跑，补字体�
 `build_assets.py` 里的 `BOOKS` 定义了每册的封面、封底与跨页区间；换书或调页序改这里。
 **改动文案后必须重跑 `build_fonts.py`**，否则新出现的汉字会掉回系统字体。
 
-## 部署到 GitHub Pages
+## 部署
 
-仓库根目录即站点根目录（已有 `.nojekyll`）：
+站点已发布在 GitHub Pages：
 
-1. 推到 GitHub；
-2. Settings → Pages → Source 选 `Deploy from a branch`，分支 `main`、目录 `/ (root)`；
-3. 等一两分钟，访问 `https://<用户名>.github.io/class11-diary/`。
+- 仓库根目录即站点根目录，`.nojekyll` 已就位，页面不需要构建；
+- 发布源：`main` 分支 `/ (root)`，推上去后由 Pages 自动构建；
+- 线上地址：<https://penguin.he.cn/class11-diary/>（GitHub 账号的 Pages 自定义域名，
+  证书由 GitHub 签发，已启用强制 HTTPS）；
+- `https://ljw0401.github.io/class11-diary/` 会 301 到上面的自定义域名。
 
 所有资源都用相对路径，放在子路径下也能正常加载。
 
-注意：GitHub Pages 只对公开仓库免费开放。仓库为私有（付费账号除外）时该地址不会生效。
+仓库需保持公开：Pages 只对公开仓库免费开放。
 
 ## 关于体积
 
