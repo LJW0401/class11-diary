@@ -4,5 +4,9 @@ assets/source/
 # 字体子集的临时字符表
 .cache-charset.txt
 
+# Python 缓存
+__pycache__/
+*.pyc
+
 .DS_Store
 Thumbs.db

@@ -8,11 +8,16 @@
 
 关键取舍
 - 页图输出为带 alpha 的 WebP：书页轮廓要真的「透」出来，翻页时才看得出纸的边。
-- 统一压到 1600x1200（4:3）：源图几乎都是 4032x3024，等比缩放后跨页与舞台比例一致，
-  左右半页切分点就落在图片正中，不需要逐张找书脊。
+- 每张跨页都要「重新装框」：中缝钉在 1600x1200 画布正中（x=800），纸的上下边钉在
+  固定高度（y=64 与 y=1135），左右两页各自按自己那半的宽度缩放。
+  源片是手持翻拍的，书在画面里忽大忽小、中缝也不在正中；不归一化的话，翻页时
+  纸边会一页一跳。归一化之后每张纸都落在同一个矩形里，翻起来才稳。
+- 中缝位置由 scripts/measure_folds.py 量出来写进 scripts/fold-lines.json，
+  这里只负责按表装框；缺表就报错，不猜。
 - 每页附带 40x30 的 base64 占位图：翻页瞬间先铺占位，再换上正图，避免白闪。
 
 用法
+    python3 scripts/measure_folds.py --write       # 换过原图先量中缝，写 fold-lines.json
     python3 scripts/build_assets.py                # 重建全部页图与清单
     python3 scripts/build_assets.py --copy-source  # 顺带复制原始 JPG 到 assets/source/
 """
@@ -43,6 +48,11 @@ THUMB_QUALITY = 62
 COVER_SIZE = (900, 1200)
 COVER_QUALITY = 80
 PLACEHOLDER_SIZE = (40, 30)
+
+# 归一化后的纸张矩形：中缝在正中的 x=800，左右各半页 770 宽，上下留 64/65 的白边。
+PAPER_BOX = (30, 64, 1570, 1135)
+FOLD_X = PAGE_SIZE[0] // 2
+FOLD_TABLE = ROOT / "scripts" / "fold-lines.json"
 
 # 书目与页序：先封面，再逐张跨页，最后封底。左右顺序即原片拍摄顺序。
 BOOKS = [
@@ -109,6 +119,39 @@ def resize(im: Image.Image, size: tuple[int, int]) -> Image.Image:
     return im.resize(size, Image.LANCZOS)
 
 
+def load_folds() -> dict[str, float]:
+    if not FOLD_TABLE.exists():
+        raise SystemExit(
+            f"缺少 {FOLD_TABLE.relative_to(ROOT)}：先跑 python3 scripts/measure_folds.py --write"
+        )
+    table = json.loads(FOLD_TABLE.read_text())
+    return {stem: float(row["fold"]) for stem, row in table.items()}
+
+
+def frame_page(im: Image.Image, fold: float) -> Image.Image:
+    """把一张跨页摆进固定画框：中缝对 x=800，纸的上下边对 PAPER_BOX。
+
+    左右两页分别缩放：源片里中缝因为透视常常不在正中，两页拍出来的宽度不等；
+    各自贴到自己那半的宽度上，纸的两条外边也就对齐了。
+    """
+    bbox = im.getchannel("A").getbbox()
+    if bbox is None:
+        raise ValueError("整张图都是透明的")
+    x0, y0, x1, y1 = bbox
+    left, top, right, bottom = PAPER_BOX
+    fold_px = int(round(fold))
+    if not x0 < fold_px < x1:
+        raise ValueError(f"中缝 {fold_px} 不在纸张范围内 {bbox}")
+
+    height = bottom - top
+    half_w = FOLD_X - left
+    out = Image.new("RGBA", PAGE_SIZE, (0, 0, 0, 0))
+    for sx0, sx1, dx in ((x0, fold_px, left), (fold_px, x1, FOLD_X)):
+        crop = im.crop((sx0, y0, sx1, y1))
+        out.paste(crop.resize((half_w, height), Image.LANCZOS), (dx, top))
+    return out
+
+
 def save_webp(im: Image.Image, path: Path, quality: int) -> int:
     im.save(path, "WEBP", quality=quality, method=6, alpha_quality=90)
     return path.stat().st_size
@@ -130,6 +173,7 @@ def build_book(book: dict) -> dict:
     stems = page_stems(book)
     log(f"\n[{slug}] {book['title']} — {len(stems)} 个跨页")
 
+    folds = load_folds()
     pages = []
     total_bytes = 0
     for i, stem in enumerate(stems, start=1):
@@ -137,16 +181,19 @@ def build_book(book: dict) -> dict:
         page_path = out / "pages" / name
         thumb_path = out / "thumbs" / name
         im = load_rgba(stem)
-
-        page = resize(im, PAGE_SIZE)
+        if stem not in folds:
+            raise SystemExit(
+                f"{stem} 没有中缝记录：先跑 python3 scripts/measure_folds.py --write"
+            )
+        page = frame_page(im, folds[stem])
         total_bytes += save_webp(page, page_path, PAGE_QUALITY)
-        total_bytes += save_webp(resize(im, THUMB_SIZE), thumb_path, THUMB_QUALITY)
+        total_bytes += save_webp(resize(page, THUMB_SIZE), thumb_path, THUMB_QUALITY)
 
         pages.append(
             {
                 "src": f"assets/books/{slug}/pages/{name}",
                 "thumb": f"assets/books/{slug}/thumbs/{name}",
-                "ph": placeholder(im),
+                "ph": placeholder(page),
                 "id": stem,
             }
         )

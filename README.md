@@ -23,8 +23,10 @@ assets/
   fonts/                    站点用字的子集（woff2）
   source/jpg/               原始 JPG 副本（不进仓库，仅本机留档）
 scripts/
-  build_assets.py           原图 → WebP 页图 + 缩略图 + books-data.js
+  measure_folds.py          量出每张跨页的中缝位置 → fold-lines.json
+  build_assets.py           原图 → 对齐后的 WebP 页图 + 缩略图 + books-data.js
   build_fonts.py            按页面文案做字体子集
+  fold-lines.json           中缝坐标表（构建输入，勿手改）
 ```
 
 ## 本地预览
@@ -44,9 +46,25 @@ python3 -m http.server 8123
 - `/home/penguin/Desktop/penguin/高中观察日记/裁剪/PNG`（透明底，优先使用）
 
 ```bash
-python3 scripts/build_assets.py        # 出页图 pages/、thumbs/、books-data.js
-python3 scripts/build_fonts.py         # 改过文案后重跑，补字体子集
+python3 scripts/measure_folds.py --write   # 原图换过之后先量中缝
+python3 scripts/build_assets.py            # 出页图 pages/、thumbs/、books-data.js
+python3 scripts/build_fonts.py             # 改过文案后重跑，补字体子集
 ```
+
+### 页图怎么对齐
+
+源片是手持翻拍的：书在画面里忽大忽小，中缝也常常不在正中，上下留白各不相同。
+直接缩放到 1600×1200 的话，翻页时纸边会一页一跳。所以每张跨页都要重新装框：
+
+- 中缝钉在画布正中 `x=800`；
+- 纸的上边钉在 `y=64`，下边钉在 `y=1135`，左右各留 30px 白边；
+- 左右两页分别按自己那半的宽度缩放——中缝因透视偏在一侧时，两页拍出来的宽度不等，
+  各自贴回 770px，两张纸的外边也就对齐了。
+
+中缝位置由 `measure_folds.py` 按「每列亮度的低分位数取最小值」量出来：中缝是两页
+纸相接处的暗缝，它在绝大多数行上都暗，而字迹只在少数行上暗。量完写进
+`scripts/fold-lines.json`，`build_assets.py` 只按表装框，缺条目直接报错。
+注意 `measure_folds.py` 读的是 `裁剪/PNG` 原图，换原图后要重跑。
 
 `build_assets.py` 里的 `BOOKS` 定义了每册的封面、封底与跨页区间；换书或调页序改这里。
 **改动文案后必须重跑 `build_fonts.py`**，否则新出现的汉字会掉回系统字体。
@@ -63,7 +81,7 @@ python3 scripts/build_fonts.py         # 改过文案后重跑，补字体子集
 
 ## 关于体积
 
-页图是 1600×1200 的带 alpha WebP（约 250 KB/张），两册合计约 23 MB；
+页图是 1600×1200 的带 alpha WebP（约 240 KB/张），两册合计约 26 MB；
 原始的 115 张 JPG/PNG 体积很大，只在 `assets/source/` 与本机原目录各留一份，
 已在 `.gitignore` 里排除，不会进仓库。
 
