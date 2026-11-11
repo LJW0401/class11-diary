@@ -75,9 +75,11 @@ python3 scripts/build_fonts.py             # 改过文案后重跑，补字体�
 
 1. 推到 GitHub；
 2. Settings → Pages → Source 选 `Deploy from a branch`，分支 `main`、目录 `/ (root)`；
-3. 等一两分钟，访问 `https://<用户名>.github.io/311-diary/`。
+3. 等一两分钟，访问 `https://<用户名>.github.io/class11-diary/`。
 
 所有资源都用相对路径，放在子路径下也能正常加载。
+
+注意：GitHub Pages 只对公开仓库免费开放。仓库为私有（付费账号除外）时该地址不会生效。
 
 ## 关于体积
 
