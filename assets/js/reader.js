@@ -57,9 +57,9 @@
   el.bookEn.textContent = book.en;
   el.veilNo.textContent = book.no;
   el.veilTitle.textContent = book.title;
-  el.pageTotal.textContent = book.pages.length;
-  el.stripCount.textContent = book.pages.length;
-  el.bar.setAttribute("aria-valuemax", String(book.pages.length));
+  el.pageTotal.textContent = book.pages.length * 2;
+  el.stripCount.textContent = book.pages.length * 2;
+  el.bar.setAttribute("aria-valuemax", String(book.pages.length * 2));
 
   // --- 提示条 -----------------------------------------------------------
   var toastTimer = 0;
@@ -97,9 +97,9 @@
   function onChange(index, page) {
     var n = index + 1;
     var total = book.pages.length;
-    el.pageNow.textContent = pad(n);
+    el.pageNow.textContent = pad(2 * n - 1);
     el.barFill.style.transform = "scaleX(" + (n / total).toFixed(4) + ")";
-    el.bar.setAttribute("aria-valuenow", String(n));
+    el.bar.setAttribute("aria-valuenow", String(2 * n - 1));
     el.btnPrev.disabled = index === 0;
     el.btnNext.disabled = index === total - 1;
     syncThumbs(index);
@@ -115,7 +115,7 @@
       var b = document.createElement("button");
       b.className = "thumb";
       b.type = "button";
-      b.setAttribute("aria-label", "第 " + (i + 1) + " 个跨页");
+      b.setAttribute("aria-label", "第 " + (2 * i + 1) + "–" + (2 * i + 2) + " 页");
       b.dataset.index = String(i);
       b.addEventListener("click", function () {
         fb.goTo(i);

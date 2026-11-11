@@ -287,6 +287,14 @@ body.home {
   color: var(--paper-2);
 }
 
+.lede p {
+  margin: 0;
+}
+
+.lede p + p {
+  margin-top: 0.75em;
+}
+
 /* --- 页脚 ------------------------------------------------------------- */
 
 .hero__foot {
